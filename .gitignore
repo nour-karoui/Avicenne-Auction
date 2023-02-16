@@ -1,3 +1,4 @@
 .idea
-./node_modules
-./auction-truffle/node_modules
+node_modules
+auction-truffle/node_modules
+auction-truffle/build
