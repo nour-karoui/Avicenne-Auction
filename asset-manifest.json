@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/auction-cienne/static/css/main.b8d11614.css",
+    "main.js": "/auction-cienne/static/js/main.f027acff.js",
+    "static/js/787.902d5eb7.chunk.js": "/auction-cienne/static/js/787.902d5eb7.chunk.js",
+    "index.html": "/auction-cienne/index.html",
+    "main.b8d11614.css.map": "/auction-cienne/static/css/main.b8d11614.css.map",
+    "main.f027acff.js.map": "/auction-cienne/static/js/main.f027acff.js.map",
+    "787.902d5eb7.chunk.js.map": "/auction-cienne/static/js/787.902d5eb7.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.b8d11614.css",
+    "static/js/main.f027acff.js"
+  ]
+}
