@@ -21,9 +21,9 @@ function Gallery() {
     return (
         <Grid container spacing={20} justifyContent="space-evenly">
             {
-                auctionsAddresses.map((address) =>
+                [1].map((address) =>
                     <Grid item key={address}>
-                        <GalleryItemCard address={address}/>
+                        <GalleryItemCard address={"1"}/>
                     </Grid>
                 )
             }

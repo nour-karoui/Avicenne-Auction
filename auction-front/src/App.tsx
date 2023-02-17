@@ -43,7 +43,7 @@ function App() {
     return (
         <ThemeProvider theme={theme}>
             <Header/>
-            <Box paddingX="200px">
+            <Box paddingX="200px" paddingBottom="200px">
                 <NewAuctionForm/>
                 <Gallery/>
             </Box>

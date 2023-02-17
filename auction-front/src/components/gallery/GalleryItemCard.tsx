@@ -1,4 +1,15 @@
-import {Button, Grid, Card, CardActions, CardContent, CardMedia, Typography, Tooltip, Chip} from "@mui/material";
+import {
+    Button,
+    Grid,
+    Card,
+    CardActions,
+    CardContent,
+    CardMedia,
+    Typography,
+    Tooltip,
+    Chip,
+    TextField, InputAdornment
+} from "@mui/material";
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import {Fragment, useEffect, useState} from "react";
 import {LoadingButton} from "@mui/lab";
@@ -23,6 +34,12 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
     const [currentBidValue, setCurrentBidValue] = useState(0);
     const [tokenUri, setTokenUri] = useState('');
     const [remainingTime, setRemainingTime] = useState<number>();
+    const [bidInputOpen, setBidInputOpen] = useState(false);
+    const [bidAmount, setBidAmount] = useState(0);
+
+    useEffect(() => {
+        setBidAmount(currentBidValue + 0.1);
+    }, [currentBidValue]);
 
     useEffect(() => {
         const intervalRef = setInterval(updateRemainingTime, 1000);
@@ -36,9 +53,7 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
         await setNftDetails(contract);
     }
     const updateRemainingTime = () => {
-        const d = new Date(0); // The 0 there is the key, which sets the date to the epoch
-        d.setUTCSeconds(expirationDate);
-        const remainingTimeInMilliseconds =  d.getMilliseconds() - new Date().getTime();
+        const remainingTimeInMilliseconds = new Date(expirationDate * 1000).getTime() - new Date().getTime();
         setRemainingTime(remainingTimeInMilliseconds);
     }
 
@@ -90,10 +105,10 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
                                 <Typography variant="subtitle2">
                                     Lead Bidder
                                 </Typography>
-                                { isLeadBidder
-                                    ? <Chip label={currentBidder.slice(0,5) + "..."} variant="outlined"/>
+                                {isLeadBidder
+                                    ? <Chip label={currentBidder.slice(0, 5) + "..."} variant="outlined"/>
                                     : <Chip label="Me"
-                                            icon={<FiberManualRecordIcon style={{transform: 'scale(0.5)'}} />}
+                                            icon={<FiberManualRecordIcon style={{transform: 'scale(0.5)'}}/>}
                                             variant="outlined" color="success"/>}
                             </Grid>
                         </Grid>
@@ -105,7 +120,8 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
                                 Remaining Time
                             </Typography>
                             <Typography variant="h6" component="div">
-                                {Math.floor(remainingTime / (1000 * 60 * 60)) }h :{Math.floor((remainingTime / (1000 * 60)) % 60)}m
+                                {Math.floor(remainingTime / (1000 * 60 * 60))}h
+                                :{Math.floor((remainingTime / (1000 * 60)) % 60)}m
                                 : {Math.floor((remainingTime / 1000) % 60)}s
                             </Typography>
                         </Fragment>
@@ -115,14 +131,40 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
             </CardContent>
             <CardActions>
                 <Grid container justifyContent="space-between" spacing={1}>
-                    <Grid item>
-                        <LoadingButton size="small"
-                                       loading={placeBidLoading}
-                                       onClick={placeBid}
-                                       variant="contained">
-                            Place a bid
-                        </LoadingButton>
-                    </Grid>
+                    {
+                        bidInputOpen ?
+                            <Grid item xs={12}>
+                                <Grid container justifyContent="space-between">
+                                    <Grid item xs={5}>
+                                        <TextField label='Bid To place' variant="standard"
+                                                   type='number'
+                                                   value={bidAmount}
+                                                   onChange={(e) => setBidAmount(parseFloat(e.target.value))}
+                                                   InputProps={{
+                                                       endAdornment:
+                                                           <InputAdornment position="end">
+                                                               ETH
+                                                           </InputAdornment>
+                                                   }}/>
+                                    </Grid>
+                                    <Grid item>
+                                        <LoadingButton size="small"
+                                                       loading={placeBidLoading}
+                                                       onClick={placeBid}
+                                                       variant="contained">
+                                            Confirm Bid
+                                        </LoadingButton>
+                                    </Grid>
+                                </Grid>
+                            </Grid> :
+                            <Grid item>
+                                <Button size="small"
+                                        onClick={() => setBidInputOpen(true)}
+                                        variant="contained">
+                                    Place a bid
+                                </Button>
+                            </Grid>
+                    }
                     <Grid item>
                         <Tooltip title={"See in Opensea"}>
                             <LoadingButton size="small"
