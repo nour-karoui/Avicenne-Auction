@@ -12,6 +12,11 @@ export const AuctionABI = [
                 "type": "uint256"
             },
             {
+                "internalType": "uint256",
+                "name": "startingPrice",
+                "type": "uint256"
+            },
+            {
                 "internalType": "address",
                 "name": "_nftOwner",
                 "type": "address"

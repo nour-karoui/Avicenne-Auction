@@ -2,11 +2,11 @@ import React from 'react';
 import './App.css';
 import Header from "./components/header/Header";
 import {createTheme, ThemeProvider} from '@mui/material/styles'
-import GalleryItemCard from "./components/gallery/GalleryItemCard";
 import Gallery from "./components/gallery/Gallery";
 import NewAuctionForm from "./components/gallery/NewAuctionForm";
-import {Box} from "@mui/material";
+import {Alert, Box} from "@mui/material";
 import Footer from "./components/footer/Footer";
+import {AlertTitle} from "@mui/lab";
 
 
 const theme = createTheme({
@@ -41,14 +41,26 @@ const theme = createTheme({
 
 function App() {
     return (
-        <ThemeProvider theme={theme}>
-            <Header/>
-            <Box paddingX="200px" paddingBottom="200px">
-                <NewAuctionForm/>
-                <Gallery/>
-            </Box>
-            <Footer/>
-        </ThemeProvider>
+    <ThemeProvider theme={theme}>
+        {
+            window.ethereum ?
+                <div>
+                    <Header/>
+                    <Box paddingX="200px" paddingBottom="200px">
+                        <NewAuctionForm/>
+                        <Gallery/>
+                    </Box>
+                    <Footer/>
+                </div>
+                :
+                <div>
+                    <Alert severity="error">
+                        <AlertTitle>Error</AlertTitle>
+                        You're Not Connected to the Blockchain — <strong>Add metamask wallet !</strong>
+                    </Alert>
+                </div>
+        }
+    </ThemeProvider>
     );
 }
 

@@ -2,6 +2,7 @@ import {ExternalProvider} from "@ethersproject/providers";
 import {ethers} from "ethers";
 import {AuctionsFactoryABI, AuctionsFactoryAddress} from '../contracts/auctionsFactory';
 import {AuctionABI} from "../contracts/auction";
+import {ERC721ABI} from "../contracts/erc721";
 
 declare global {
     interface Window {
@@ -31,6 +32,10 @@ export const getWalletBalance = async () => {
 }
 
 export const auctionsFactory = new ethers.Contract(AuctionsFactoryAddress, AuctionsFactoryABI, signer);
+
+export const getERC721Contract = async (address: string) => {
+    return new ethers.Contract(address, ERC721ABI, signer);
+}
 
 export const getAuctionAddress = async (index: number) => {
     return await auctionsFactory.getAuctionAddressByIndex(index);

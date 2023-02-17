@@ -3,6 +3,7 @@
 pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./AuctionFactory.sol";
 
@@ -14,20 +15,21 @@ contract Auction is Ownable{
     address private currentBidder;
     uint256 private currentBidValue;
     uint256 private endTime;
-    ERC721 private nft;
+    ERC721URIStorage private nft;
     AuctionsFactory private factory;
 
-    constructor(address _nftAddress, uint256 _tokenId, address _nftOwner, address auctionFactory) {
-        setAuctionProperties(_nftAddress, _tokenId, _nftOwner);
+    constructor(address _nftAddress, uint256 _tokenId, uint256 startingPrice, address _nftOwner, address auctionFactory) {
+        nft = ERC721URIStorage(_nftAddress);
+        setAuctionProperties(_nftAddress, _tokenId, startingPrice, _nftOwner);
         factory = AuctionsFactory(auctionFactory);
     }
 
-    function setAuctionProperties(address _nftAddress, uint256 _tokenId, address _nftOwner) private {
+    function setAuctionProperties(address _nftAddress, uint256 _tokenId, uint256 startingPrice, address _nftOwner) private {
         transferOwnership(_nftOwner);
         nftAddress = _nftAddress;
         tokenId = _tokenId;
         currentBidder = address(0);
-        currentBidValue = 0;
+        currentBidValue = startingPrice;
         endTime = block.timestamp + 20 minutes;
         currentState = State.OPEN;
     }
@@ -84,7 +86,6 @@ contract Auction is Ownable{
     }
 
     modifier nftOwner(address _nftAddress, uint256 _tokenId, address _nftOwner) {
-        nft = ERC721(_nftAddress);
         address nftOwnerAddress = nft.ownerOf(_tokenId);
         require(_nftOwner == nftOwnerAddress, "you are not the owner of the NFT");
         _;

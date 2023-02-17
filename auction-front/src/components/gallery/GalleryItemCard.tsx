@@ -11,11 +11,12 @@ import {
     TextField, InputAdornment
 } from "@mui/material";
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import {Fragment, useEffect, useState} from "react";
+import {Fragment, SyntheticEvent, useEffect, useState} from "react";
 import {LoadingButton} from "@mui/lab";
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import {getAuction} from "../../services/initWeb3";
 import {ethers} from "ethers";
+import {Error, Success} from "../../services/responses";
 
 
 const isLeadBidder = true;
@@ -23,6 +24,8 @@ const isLeadBidder = true;
 interface GalleryItemCardProps {
     address: string;
 }
+
+const BID_AUCTION = "Bid Auction";
 
 function GalleryItemCard({address}: GalleryItemCardProps) {
 
@@ -37,6 +40,15 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
     const [remainingTime, setRemainingTime] = useState<number>();
     const [bidInputOpen, setBidInputOpen] = useState(false);
     const [bidAmount, setBidAmount] = useState(0);
+    const [nftAddress, setNftAddress] = useState('');
+    const [tokenId, setTokenId] = useState('');
+
+    const [successOpen, setSuccessOpen] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
+    const [errorOpen, setErrorOpen] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [loading, setLoading] = useState<string | undefined>(undefined)
+
 
     useEffect(() => {
         setBidAmount(parseFloat(currentBidValue) + 0.1);
@@ -61,26 +73,57 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
     const setNftDetails = async (contract: any) => {
         const endTime = await contract.getEndTime();
         setExpirationDate(new Date(endTime * 1000).getTime());
+        console.log(new Date(endTime * 1000).getTime());
         const currentBidder = await contract.getCurrentBidder();
         setCurrentBidder(currentBidder);
         const currentBidValue = await contract.getCurrentBidValue();
         setCurrentBidValue(ethers.utils.formatEther(currentBidValue));
         const nftOwner = await contract.getNFTOwner();
         setOwner(nftOwner);
+        const nftAddress = await contract.getNFTAddress();
+        setNftAddress(nftAddress);
+        const tokenId = await contract.getTokenId();
+        setTokenId(tokenId);
         const tokenUri = await contract.getTokenUri();
         setTokenUri(tokenUri);
     }
 
     const placeBid = async () => {
-        const bid = await auction.bid({value: ethers.utils.parseEther('0.1')});
+        setLoading(BID_AUCTION);
+        try {
+            const tx = await auction.bid({value: ethers.utils.parseEther('0.1')});
+            await tx.wait();
+        }catch (e: any) {
+            setErrorMessage(e.reason);
+            setErrorOpen(true);
+        }
+        finally {
+            setLoading(undefined);
+        }
     }
 
+    const handleSuccessClose = (event?: SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setSuccessOpen(false);
+    };
+
+    const handleErrorClose = (event?: SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setErrorOpen(false);
+    };
+
     const openOpenSeaLink = () => {
-        window.open('https://www.geeksforgeeks.org/how-to-open-url-in-new-tab-using-javascript/', '_blank');
+        window.open(`https://testnets.opensea.io/assets/goerli/${nftAddress}/${tokenId}`, '_blank');
     }
 
     return (
         <Card sx={{maxWidth: 345, boxShadow: "none", backgroundColor: "unset"}}>
+            <Success open={successOpen} handleClose={handleSuccessClose} message={successMessage}></Success>
+            <Error open={errorOpen} handleClose={handleErrorClose} message={errorMessage}></Error>
             <CardMedia
                 sx={{height: 300}}
                 image="https://www.vincentvangogh.org/images/self-portrait.jpg"
@@ -148,7 +191,7 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
                                     </Grid>
                                     <Grid item>
                                         <LoadingButton size="small"
-                                                       loading={placeBidLoading}
+                                                       loading={loading === BID_AUCTION}
                                                        onClick={placeBid}
                                                        variant="contained">
                                             Confirm Bid

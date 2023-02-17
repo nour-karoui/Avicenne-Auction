@@ -69,6 +69,11 @@ export const AuctionsFactoryABI = [
                 "internalType": "uint256",
                 "name": "_tokenId",
                 "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "startingPrice",
+                "type": "uint256"
             }
         ],
         "name": "createNewAuction",
@@ -123,4 +128,4 @@ export const AuctionsFactoryABI = [
     }
 ];
 
-export const AuctionsFactoryAddress = '0xeCb15356647C726f5eB6341b94E7d7cF2eFcCF14';
+export const AuctionsFactoryAddress = '0x5E98ccC9b5AA92B6a80265Cc075e7261cc320e0b';

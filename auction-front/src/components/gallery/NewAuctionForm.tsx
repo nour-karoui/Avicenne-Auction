@@ -1,15 +1,23 @@
 import {Grid, InputAdornment, TextField} from "@mui/material";
 import {LoadingButton} from "@mui/lab";
-import {useState} from "react";
-import {auctionsFactory} from "../../services/initWeb3";
+import {SyntheticEvent, useState} from "react";
+import {auctionsFactory, getERC721Contract} from "../../services/initWeb3";
+import {Success, Error} from "../../services/responses";
+import {ethers} from "ethers";
+
+const ADD_AUCTION = "Add Auction";
 
 function NewAuctionForm() {
-
-    const [addAuctionLoading, setAddAuctionLoading] = useState(false);
 
     const [tokenAddress, setTokenAddress] = useState(new FormInput((v) => v !== '', ''));
     const [tokenId, setTokenId] = useState(new FormInput((v) => v !== '', ''));
     const [startingPrice, setStartingPrice] = useState(new FormInput((v) => v !== 0, 0));
+
+    const [successOpen, setSuccessOpen] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
+    const [errorOpen, setErrorOpen] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [loading, setLoading] = useState<string | undefined>(undefined);
 
     const onTokenAddressChange = (value: string) => {
         setTokenAddress(tokenAddress.onChange(value));
@@ -25,12 +33,41 @@ function NewAuctionForm() {
     }
 
     const onSubmit = async () => {
-        const tx = await auctionsFactory.createNewAuction(tokenAddress.value, tokenId.value, {gasLimit: 5000000});
-        await tx.wait();
+        setLoading(ADD_AUCTION);
+        try {
+            const tx = await auctionsFactory.createNewAuction(tokenAddress.value, tokenId.value, ethers.utils.parseEther(startingPrice.value.toString()), {gasLimit: 5000000});
+            await tx.wait();
+            const tokenContract = await getERC721Contract(tokenId.value.toString());
+            tokenContract.approve()
+        }catch (e: any) {
+            setErrorMessage(e.reason);
+            setErrorOpen(true);
+        }
+        finally {
+            setLoading(undefined);
+        }
     }
 
+    const handleSuccessClose = (event?: SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setSuccessOpen(false);
+    };
+
+    const handleErrorClose = (event?: SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setErrorOpen(false);
+    };
+
+
+    // @ts-ignore
     return (
         <Grid container spacing={3} paddingBottom="50px">
+            <Success open={successOpen} handleClose={handleSuccessClose} message={successMessage}></Success>
+            <Error open={errorOpen} handleClose={handleErrorClose} message={errorMessage}></Error>
             <Grid item container>
                 <TextField label='Token Address' variant="standard"
                            value={tokenAddress.value}
@@ -60,9 +97,9 @@ function NewAuctionForm() {
                 </Grid>
                 <Grid item>
                     <LoadingButton variant='contained'
+                                   loading={loading === ADD_AUCTION}
                                    disabled={!(tokenAddress.isValid && tokenId.isValid && startingPrice.isValid)
                                        || tokenAddress.isPristine || tokenId.isPristine || startingPrice.isPristine}
-                                   loading={addAuctionLoading}
                                    onClick={onSubmit}
                     >
                         Add Auction

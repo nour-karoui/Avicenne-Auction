@@ -14,11 +14,12 @@ contract AuctionsFactory {
         totalAuctionsCount = 0;
     }
 
-    function createNewAuction(address _nftAddress, uint256 _tokenId) payable public {
-        // require(openAuctions[concatTokenProperties(_nftAddress, _tokenId)] == false, 'This NFT is in an open Auction');
-        Auction auction = new Auction(_nftAddress, _tokenId, msg.sender, address(this));
-        // setAuctionState(_nftAddress, _tokenId, true);
+    function createNewAuction(address _nftAddress, uint256 _tokenId, uint256 startingPrice) payable public returns(address) {
+        require(openAuctions[concatTokenProperties(_nftAddress, _tokenId)] == false, 'This NFT is in an open Auction');
+        Auction auction = new Auction(_nftAddress, _tokenId, startingPrice, msg.sender, address(this));
+        setAuctionState(_nftAddress, _tokenId, true);
         appendAuction(address(auction));
+        return address(auction);
     }
 
     function appendAuction(address auction) private {
