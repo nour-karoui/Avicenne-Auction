@@ -17,7 +17,7 @@ contract Auction is Ownable{
     ERC721 private nft;
     AuctionsFactory private factory;
 
-    constructor(address _nftAddress, uint256 _tokenId, address _nftOwner, address auctionFactory) nftOwner(_nftAddress, _tokenId, _nftOwner) {
+    constructor(address _nftAddress, uint256 _tokenId, address _nftOwner, address auctionFactory) {
         setAuctionProperties(_nftAddress, _tokenId, _nftOwner);
         factory = AuctionsFactory(auctionFactory);
     }
