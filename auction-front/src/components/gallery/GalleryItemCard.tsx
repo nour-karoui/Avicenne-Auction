@@ -4,6 +4,7 @@ import {Fragment, useEffect, useState} from "react";
 import {LoadingButton} from "@mui/lab";
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import {getAuction} from "../../services/initWeb3";
+import {ethers} from "ethers";
 
 
 const isLeadBidder = true;
@@ -20,7 +21,7 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
     const [expirationDate, setExpirationDate] = useState<number>(0);
     const [owner, setOwner] = useState('');
     const [currentBidder, setCurrentBidder] = useState<string>('');
-    const [currentBidValue, setCurrentBidValue] = useState(0);
+    const [currentBidValue, setCurrentBidValue] = useState('0');
     const [tokenUri, setTokenUri] = useState('');
     const [remainingTime, setRemainingTime] = useState<number>();
 
@@ -44,21 +45,19 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
 
     const setNftDetails = async (contract: any) => {
         const endTime = await contract.getEndTime();
-        console.log('this is endtime')
-        console.log(endTime.toNumber())
-        setExpirationDate(endTime.toNumber());
+        setExpirationDate(new Date(endTime * 1000).getTime());
         const currentBidder = await contract.getCurrentBidder();
         setCurrentBidder(currentBidder);
         const currentBidValue = await contract.getCurrentBidValue();
-        setCurrentBidValue(currentBidValue.toNumber());
+        setCurrentBidValue(ethers.utils.formatEther(currentBidValue));
         const nftOwner = await contract.getNFTOwner();
         setOwner(nftOwner);
         const tokenUri = await contract.getTokenUri();
         setTokenUri(tokenUri);
     }
 
-    const placeBid = () => {
-
+    const placeBid = async () => {
+        const bid = await auction.bid({value: ethers.utils.parseEther('0.1')});
     }
 
     const openOpenSeaLink = () => {

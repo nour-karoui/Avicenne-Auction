@@ -48,7 +48,7 @@ contract Auction is Ownable{
     function endAuction() public payable {
         require(block.timestamp > endTime, "The auction is not over yet");
         require(currentState == State.OPEN, "The prize is already claimed");
-        require(msg.sender != owner() && msg.sender != currentBidder, 'You are not allowed to end this auction');
+        require(msg.sender == owner() || msg.sender == currentBidder, 'You are not allowed to end this auction');
         nft.safeTransferFrom(owner(), currentBidder, tokenId);
         payable(owner()).transfer(currentBidValue);
         currentState = State.CLAIMED;
