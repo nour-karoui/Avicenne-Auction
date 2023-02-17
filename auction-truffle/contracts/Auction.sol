@@ -2,8 +2,7 @@
 
 pragma solidity 0.8.17;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./AuctionFactory.sol";
 
@@ -15,11 +14,11 @@ contract Auction is Ownable{
     address private currentBidder;
     uint256 private currentBidValue;
     uint256 private endTime;
-    ERC721URIStorage private nft;
+    ERC1155 private nft;
     AuctionsFactory private factory;
 
     constructor(address _nftAddress, uint256 _tokenId, uint256 startingPrice, address _nftOwner, address auctionFactory) {
-        nft = ERC721URIStorage(_nftAddress);
+        nft = ERC1155(_nftAddress);
         setAuctionProperties(_nftAddress, _tokenId, startingPrice, _nftOwner);
         factory = AuctionsFactory(auctionFactory);
     }
@@ -51,7 +50,7 @@ contract Auction is Ownable{
         require(block.timestamp > endTime, "The auction is not over yet");
         require(currentState == State.OPEN, "The prize is already claimed");
         require(msg.sender == owner() || msg.sender == currentBidder, 'You are not allowed to end this auction');
-        nft.safeTransferFrom(owner(), currentBidder, tokenId);
+        nft.safeTransferFrom(owner(), currentBidder, tokenId, 1, bytes32(0));
         payable(owner()).transfer(currentBidValue);
         currentState = State.CLAIMED;
         factory.setAuctionState(nftAddress, tokenId, false);
@@ -82,12 +81,12 @@ contract Auction is Ownable{
     }
 
     function getTokenUri() public view returns(string memory) {
-        return nft.tokenURI(tokenId);
+        return nft.uri(tokenId);
     }
 
     modifier nftOwner(address _nftAddress, uint256 _tokenId, address _nftOwner) {
-        address nftOwnerAddress = nft.ownerOf(_tokenId);
-        require(_nftOwner == nftOwnerAddress, "you are not the owner of the NFT");
+        uint256 amount = nft.balanceOf(_nftOwner, _tokenId);
+        require(amount > 0, "you are not the owner of the NFT");
         _;
     }
 }

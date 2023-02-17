@@ -36,10 +36,13 @@ function NewAuctionForm() {
         setLoading(ADD_AUCTION);
         try {
             const tx = await auctionsFactory.createNewAuction(tokenAddress.value, tokenId.value, ethers.utils.parseEther(startingPrice.value.toString()), {gasLimit: 5000000});
-            await tx.wait();
-            const tokenContract = await getERC721Contract(tokenId.value.toString());
-            tokenContract.approve(tokenAddress.value, tokenId.value);
+            const result = await tx.wait();
+            const auctionAddress = result.events[0].address;
+            const tokenContract = await getERC721Contract(tokenAddress.value.toString());
+            const nftTx = await tokenContract.setApprovalForAll(auctionAddress, true, {gasLimit: 5000000});
+            await nftTx.wait();
         }catch (e: any) {
+            console.log(e);
             setErrorMessage(e.reason);
             setErrorOpen(true);
         }

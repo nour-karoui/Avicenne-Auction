@@ -77,7 +77,13 @@ export const AuctionsFactoryABI = [
             }
         ],
         "name": "createNewAuction",
-        "outputs": [],
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
         "stateMutability": "payable",
         "type": "function",
         "payable": true
@@ -128,4 +134,4 @@ export const AuctionsFactoryABI = [
     }
 ];
 
-export const AuctionsFactoryAddress = '0x5E98ccC9b5AA92B6a80265Cc075e7261cc320e0b';
+export const AuctionsFactoryAddress = '0xAdF35751d3970FA64351c861b9791fD554DBD5a5';

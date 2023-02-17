@@ -1,14 +1,16 @@
 import {
+    Box,
     Button,
-    Grid,
     Card,
     CardActions,
     CardContent,
     CardMedia,
-    Typography,
-    Tooltip,
     Chip,
-    TextField, InputAdornment, Box
+    Grid,
+    InputAdornment,
+    TextField,
+    Tooltip,
+    Typography
 } from "@mui/material";
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import {Fragment, SyntheticEvent, useEffect, useState} from "react";
@@ -16,9 +18,9 @@ import {Error, Success} from "../../services/responses";
 import {Alert, LoadingButton} from "@mui/lab";
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import CheckIcon from '@mui/icons-material/Check';
-import {getAuction} from "../../services/initWeb3";
+import {getAuction, getWalletAddress} from "../../services/initWeb3";
 import {ethers} from "ethers";
-import {getWalletAddress} from "../../services/initWeb3";
+import axios from "axios";
 
 const isLeadBidder = true;
 
@@ -32,6 +34,7 @@ interface GalleryItemCardProps {
 }
 
 const BID_AUCTION = "Bid Auction";
+const END_AUCTION = "End Auction";
 
 function GalleryItemCard({address}: GalleryItemCardProps) {
 
@@ -48,6 +51,7 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
     const [bidAmount, setBidAmount] = useState(0);
     const [nftAddress, setNftAddress] = useState('');
     const [tokenId, setTokenId] = useState('');
+    const [imageUrl, setImageUrl] = useState('https://www.vincentvangogh.org/images/self-portrait.jpg');
 
     const [successOpen, setSuccessOpen] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
@@ -76,7 +80,7 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
         }
         initAuctionDetails();
         return () => intervalRef && clearInterval(intervalRef);
-    }, [address, closed]);
+    }, [address, closed, expirationDate]);
 
     const initAuctionDetails = async () => {
         const contract = await getAuction(address);
@@ -103,8 +107,7 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
 
     const setNftDetails = async (contract: any) => {
         const endTime = await contract.getEndTime();
-        setExpirationDate(new Date(endTime * 1000).getTime());
-        console.log(new Date(endTime * 1000).getTime());
+        setExpirationDate(endTime.toNumber() * 1000);
         const currentBidder = await contract.getCurrentBidder();
         setCurrentBidder(currentBidder);
         const currentBidValue = await contract.getCurrentBidValue();
@@ -117,20 +120,22 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
         setTokenId(tokenId);
         const state: State = await contract.currentState();
         setClaimed(state === State.CLAIMED);
-        const tokenUri = await contract.getTokenUri();
-        setTokenUri(tokenUri);
+        const nftTokenUri = await contract.getTokenUri();
+        setTokenUri(nftTokenUri.replace('0x{id}', tokenId));
+        await axios.get(nftTokenUri.replace('0x{id}', tokenId)).then(res => {
+            setImageUrl(res.data.image);
+        });
     }
 
     const placeBid = async () => {
         setLoading(BID_AUCTION);
         try {
-            const tx = await auction.bid({value: ethers.utils.parseEther('0.1')});
+            const tx = await auction.bid({value: ethers.utils.parseEther(bidAmount.toString())});
             await tx.wait();
-        }catch (e: any) {
+        } catch (e: any) {
             setErrorMessage(e.reason);
             setErrorOpen(true);
-        }
-        finally {
+        } finally {
             setLoading(undefined);
         }
     }
@@ -153,8 +158,18 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
         window.open(`https://testnets.opensea.io/assets/goerli/${nftAddress}/${tokenId}`, '_blank');
     }
 
-    const claimTransferItem = () => {
-
+    const claimTransferItem = async () => {
+        setLoading(END_AUCTION);
+        try {
+            const tx = await auction.endAuction({gasLimit: 5000000});
+            const result = await tx.wait();
+        } catch (e: any) {
+            console.log(e);
+            setErrorMessage(e.reason);
+            setErrorOpen(true);
+        } finally {
+            setLoading(undefined);
+        }
     }
 
     return (
@@ -163,7 +178,7 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
             <Error open={errorOpen} handleClose={handleErrorClose} message={errorMessage}></Error>
             <CardMedia
                 sx={{height: 300}}
-                image="https://www.vincentvangogh.org/images/self-portrait.jpg"
+                image={imageUrl}
                 title={"name"}
             />
             <CardContent>
@@ -184,7 +199,7 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
                                 <Typography variant="subtitle2">
                                     Lead Bidder
                                 </Typography>
-                                {isLeadBidder
+                                {currentBidder == walletAddress
                                     ? <Chip label={currentBidder.slice(0, 5) + "..."} variant="outlined"/>
                                     : <Chip label="Me"
                                             icon={<FiberManualRecordIcon style={{transform: 'scale(0.5)'}}/>}
@@ -232,20 +247,22 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
                                         </Button> :
                                         (
                                             currentBidder === walletAddress ?
-                                                <Button size="small"
-                                                        color="success"
-                                                        onClick={claimTransferItem}
-                                                        variant="contained">
+                                                <LoadingButton size="small"
+                                                               loading={loading == END_AUCTION}
+                                                               color="success"
+                                                               onClick={claimTransferItem}
+                                                               variant="contained">
                                                     Claim item
-                                                </Button>
+                                                </LoadingButton>
                                                 : (
                                                     owner === walletAddress ?
-                                                        <Button size="small"
-                                                                color="success"
-                                                                onClick={claimTransferItem}
-                                                                variant="contained">
+                                                        <LoadingButton size="small"
+                                                                       loading={loading == END_AUCTION}
+                                                                       color="success"
+                                                                       onClick={claimTransferItem}
+                                                                       variant="contained">
                                                             Transfer item
-                                                        </Button>
+                                                        </LoadingButton>
                                                         :
                                                         <Button size="small"
                                                                 color="success"
