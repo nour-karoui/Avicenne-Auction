@@ -8,17 +8,23 @@ import {
     Typography,
     Tooltip,
     Chip,
-    TextField, InputAdornment
+    TextField, InputAdornment, Box
 } from "@mui/material";
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import {Fragment, useEffect, useState} from "react";
-import {LoadingButton} from "@mui/lab";
+import {Alert, LoadingButton} from "@mui/lab";
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import {getAuction} from "../../services/initWeb3";
 import {ethers} from "ethers";
-
+import CheckIcon from '@mui/icons-material/Check';
+import {getWalletAddress} from "../../services/initWeb3";
 
 const isLeadBidder = true;
+
+export enum State {
+    OPEN,
+    CLAIMED,
+}
 
 interface GalleryItemCardProps {
     address: string;
@@ -38,24 +44,49 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
     const [bidInputOpen, setBidInputOpen] = useState(false);
     const [bidAmount, setBidAmount] = useState(0);
 
+    const [closed, setClosed] = useState(false);
+    const [claimed, setClaimed] = useState(false);
+
+    const [walletAddress, setWalletAddress] = useState<string>('0x00');
+
+    useEffect(() => {
+        initWalletAddress().then();
+    }, []);
+
     useEffect(() => {
         setBidAmount(parseFloat(currentBidValue) + 0.1);
     }, [currentBidValue]);
 
     useEffect(() => {
-        const intervalRef = setInterval(updateRemainingTime, 1000);
+        let intervalRef: NodeJS.Timer;
+        if (!closed) {
+            intervalRef = setInterval(updateRemainingTime, 1000);
+        }
         initAuctionDetails();
-        return () => clearInterval(intervalRef);
-    }, [address]);
+        return () => intervalRef && clearInterval(intervalRef);
+    }, [address, closed]);
 
     const initAuctionDetails = async () => {
         const contract = await getAuction(address);
         setAuction(contract);
         await setNftDetails(contract);
     }
+
+    const initWalletAddress = async () => {
+        const address = await getWalletAddress();
+        if (address) {
+            setWalletAddress(address);
+        }
+    }
+
     const updateRemainingTime = () => {
         const remainingTimeInMilliseconds = new Date(expirationDate).getTime() - new Date().getTime();
-        setRemainingTime(remainingTimeInMilliseconds);
+        if (remainingTimeInMilliseconds < 0) {
+            setClosed(true);
+        } else {
+            setRemainingTime(remainingTimeInMilliseconds);
+            setClosed(false);
+        }
     }
 
     const setNftDetails = async (contract: any) => {
@@ -67,8 +98,10 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
         setCurrentBidValue(ethers.utils.formatEther(currentBidValue));
         const nftOwner = await contract.getNFTOwner();
         setOwner(nftOwner);
-        const tokenUri = await contract.getTokenUri();
-        setTokenUri(tokenUri);
+        // const tokenUri = await contract.getTokenUri();
+        // setTokenUri(tokenUri);
+        const state: State = await contract.currentState();
+        setClaimed(state === State.CLAIMED);
     }
 
     const placeBid = async () => {
@@ -77,6 +110,10 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
 
     const openOpenSeaLink = () => {
         window.open('https://www.geeksforgeeks.org/how-to-open-url-in-new-tab-using-javascript/', '_blank');
+    }
+
+    const claimTransferItem = () => {
+
     }
 
     return (
@@ -113,7 +150,7 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
                         </Grid>
                     </Grid>
                     <Grid item>{
-                        remainingTime &&
+                        (remainingTime && !closed) &&
                         <Fragment>
                             <Typography variant="subtitle2">
                                 Remaining Time
@@ -125,44 +162,92 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
                             </Typography>
                         </Fragment>
                     }
+                        {
+                            closed &&
+                            <Box width="100px" justifyContent="center" justifyItems="center">
+                                <Alert severity="error" variant="filled" icon={false} sx={{textAlign: "center"}}>
+                                    CLOSED
+                                </Alert>
+                            </Box>
+                        }
                     </Grid>
                 </Grid>
             </CardContent>
             <CardActions>
                 <Grid container justifyContent="space-between" spacing={1}>
                     {
-                        bidInputOpen ?
-                            <Grid item xs={12}>
-                                <Grid container justifyContent="space-between">
-                                    <Grid item xs={5}>
-                                        <TextField label='Bid To place' variant="standard"
-                                                   type='number'
-                                                   value={bidAmount}
-                                                   onChange={(e) => setBidAmount(parseFloat(e.target.value))}
-                                                   InputProps={{
-                                                       endAdornment:
-                                                           <InputAdornment position="end">
-                                                               ETH
-                                                           </InputAdornment>
-                                                   }}/>
-                                    </Grid>
-                                    <Grid item>
-                                        <LoadingButton size="small"
-                                                       loading={placeBidLoading}
-                                                       onClick={placeBid}
-                                                       variant="contained">
-                                            Confirm Bid
-                                        </LoadingButton>
-                                    </Grid>
-                                </Grid>
-                            </Grid> :
+                        closed ?
                             <Grid item>
-                                <Button size="small"
-                                        onClick={() => setBidInputOpen(true)}
-                                        variant="contained">
-                                    Place a bid
-                                </Button>
-                            </Grid>
+                                {
+                                    claimed ?
+                                        <Button size="small"
+                                                disabled
+                                                color="success"
+                                                endIcon={<CheckIcon/>}
+                                                variant="contained">
+                                            Claimed
+                                        </Button> :
+                                        (
+                                            currentBidder === walletAddress ?
+                                                <Button size="small"
+                                                        color="success"
+                                                        onClick={claimTransferItem}
+                                                        variant="contained">
+                                                    Claim item
+                                                </Button>
+                                                : (
+                                                    owner === walletAddress ?
+                                                        <Button size="small"
+                                                                color="success"
+                                                                onClick={claimTransferItem}
+                                                                variant="contained">
+                                                            Transfer item
+                                                        </Button>
+                                                        :
+                                                        <Button size="small"
+                                                                color="success"
+                                                                disabled
+                                                                variant="contained">
+                                                            Closed
+                                                        </Button>
+                                                )
+                                        )
+                                }
+                            </Grid> :
+                            (
+                                bidInputOpen ?
+                                    <Grid item xs={12}>
+                                        <Grid container justifyContent="space-between" alignItems="center">
+                                            <Grid item xs={5}>
+                                                <TextField label='Bid To place' variant="standard"
+                                                           type='number'
+                                                           value={bidAmount}
+                                                           onChange={(e) => setBidAmount(parseFloat(e.target.value))}
+                                                           InputProps={{
+                                                               endAdornment:
+                                                                   <InputAdornment position="end">
+                                                                       ETH
+                                                                   </InputAdornment>
+                                                           }}/>
+                                            </Grid>
+                                            <Grid item>
+                                                <LoadingButton size="small"
+                                                               loading={placeBidLoading}
+                                                               onClick={placeBid}
+                                                               variant="contained">
+                                                    Confirm Bid
+                                                </LoadingButton>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid> :
+                                    <Grid item>
+                                        <Button size="small"
+                                                onClick={() => setBidInputOpen(true)}
+                                                variant="contained">
+                                            Place a bid
+                                        </Button>
+                                    </Grid>
+                            )
                     }
                     <Grid item>
                         <Tooltip title={"See in Opensea"}>
