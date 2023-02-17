@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import './App.css';
 import Header from "./components/header/Header";
 import {createTheme, ThemeProvider} from '@mui/material/styles'
@@ -46,6 +46,9 @@ const theme = createTheme({
 });
 
 function App() {
+
+    const [_updateAuctions, _setUpdateAuctions] = useState(false);
+
     return (
     <ThemeProvider theme={theme}>
         {
@@ -53,8 +56,8 @@ function App() {
                 <div>
                     <Header/>
                     <Box paddingX="200px" paddingBottom="200px">
-                        <NewAuctionForm/>
-                        <Gallery/>
+                        <NewAuctionForm addAuctionCallback={() => _setUpdateAuctions(!_updateAuctions)}/>
+                        <Gallery updateAuctions={_updateAuctions}/>
                     </Box>
                     <Footer/>
                 </div>

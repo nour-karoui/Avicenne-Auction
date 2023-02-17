@@ -7,7 +7,11 @@ import {ethers} from "ethers";
 
 const ADD_AUCTION = "Add Auction";
 
-function NewAuctionForm() {
+interface NewAuctionFormProps {
+    addAuctionCallback: () => void;
+}
+
+function NewAuctionForm({addAuctionCallback}: NewAuctionFormProps) {
 
     const [tokenAddress, setTokenAddress] = useState(new FormInput((v) => v !== '', ''));
     const [tokenId, setTokenId] = useState(new FormInput((v) => v !== '', ''));
@@ -41,6 +45,7 @@ function NewAuctionForm() {
             const tokenContract = await getERC721Contract(tokenAddress.value.toString());
             const nftTx = await tokenContract.setApprovalForAll(auctionAddress, true, {gasLimit: 5000000});
             await nftTx.wait();
+            addAuctionCallback();
         }catch (e: any) {
             console.log(e);
             setErrorMessage(e.reason);

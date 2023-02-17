@@ -3,11 +3,17 @@ import {Grid} from "@mui/material";
 import {useEffect, useState} from "react";
 import {auctionsFactory, getAuctionAddress} from "../../services/initWeb3";
 
-function Gallery() {
+interface GalleryProps {
+    updateAuctions: Boolean;
+}
+
+function Gallery({updateAuctions}: GalleryProps) {
     const [auctionsAddresses, setAuctionsAddresses] = useState<string[]>([]);
+
     useEffect(() => {
         getAuctions();
-    }, [])
+    }, [updateAuctions]);
+
     const getAuctions = async () => {
         const addressesList = [];
         const auctionsCount = await auctionsFactory.totalAuctionsCount();

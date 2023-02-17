@@ -20,14 +20,14 @@ import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import CheckIcon from '@mui/icons-material/Check';
 import {getAuction, getWalletAddress} from "../../services/initWeb3";
 import {ethers} from "ethers";
-import axios from "axios";
-
-const isLeadBidder = true;
+import axios, {AxiosResponse} from "axios";
 
 export enum State {
     OPEN,
     CLAIMED,
 }
+
+const defaultImageURL = 'https://www.vincentvangogh.org/images/self-portrait.jpg';
 
 interface GalleryItemCardProps {
     address: string;
@@ -51,7 +51,7 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
     const [bidAmount, setBidAmount] = useState(0);
     const [nftAddress, setNftAddress] = useState('');
     const [tokenId, setTokenId] = useState('');
-    const [imageUrl, setImageUrl] = useState('https://www.vincentvangogh.org/images/self-portrait.jpg');
+    const [imageUrl, setImageUrl] = useState(defaultImageURL);
 
     const [successOpen, setSuccessOpen] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
@@ -122,9 +122,10 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
         setClaimed(state === State.CLAIMED);
         const nftTokenUri = await contract.getTokenUri();
         setTokenUri(nftTokenUri.replace('0x{id}', tokenId));
-        await axios.get(nftTokenUri.replace('0x{id}', tokenId)).then(res => {
+        if (imageUrl === defaultImageURL) {
+            const res: AxiosResponse = await axios.get(nftTokenUri.replace('0x{id}', tokenId));
             setImageUrl(res.data.image);
-        });
+        }
     }
 
     const placeBid = async () => {
