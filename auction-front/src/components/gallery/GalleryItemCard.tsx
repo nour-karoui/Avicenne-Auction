@@ -162,7 +162,7 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
         setLoading(END_AUCTION);
         try {
             const tx = await auction.endAuction({gasLimit: 5000000});
-            const result = await tx.wait();
+            await tx.wait();
         } catch (e: any) {
             console.log(e);
             setErrorMessage(e.reason);

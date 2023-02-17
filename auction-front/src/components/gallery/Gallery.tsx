@@ -17,7 +17,6 @@ function Gallery() {
             addressesList.push(address);
         }
         setAuctionsAddresses(addressesList);
-        console.log(addressesList);
     }
     return (
         <Grid container spacing={20} justifyContent="space-evenly">
