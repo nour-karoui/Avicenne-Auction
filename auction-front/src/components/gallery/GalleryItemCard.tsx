@@ -223,7 +223,7 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
                         {
                             closed &&
                             <Box width="100px" justifyContent="center" justifyItems="center">
-                                <Alert severity="error" variant="filled" icon={false} sx={{textAlign: "center"}}>
+                                <Alert severity="error" variant="filled" icon={false} sx={{justifyContent: 'center'}}>
                                     CLOSED
                                 </Alert>
                             </Box>
