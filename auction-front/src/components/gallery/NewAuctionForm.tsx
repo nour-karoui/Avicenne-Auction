@@ -38,7 +38,7 @@ function NewAuctionForm() {
             const tx = await auctionsFactory.createNewAuction(tokenAddress.value, tokenId.value, ethers.utils.parseEther(startingPrice.value.toString()), {gasLimit: 5000000});
             await tx.wait();
             const tokenContract = await getERC721Contract(tokenId.value.toString());
-            tokenContract.approve()
+            tokenContract.approve(tokenAddress.value, tokenId.value);
         }catch (e: any) {
             setErrorMessage(e.reason);
             setErrorOpen(true);
