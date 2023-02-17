@@ -64,7 +64,7 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
         }
         initAuctionDetails();
         return () => intervalRef && clearInterval(intervalRef);
-    }, [address, closed]);
+    }, [address, closed, expirationDate]);
 
     const initAuctionDetails = async () => {
         const contract = await getAuction(address);
@@ -91,7 +91,7 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
 
     const setNftDetails = async (contract: any) => {
         const endTime = await contract.getEndTime();
-        setExpirationDate(new Date(endTime * 1000).getTime());
+        setExpirationDate(endTime.toNumber() * 1000);
         const currentBidder = await contract.getCurrentBidder();
         setCurrentBidder(currentBidder);
         const currentBidValue = await contract.getCurrentBidValue();
