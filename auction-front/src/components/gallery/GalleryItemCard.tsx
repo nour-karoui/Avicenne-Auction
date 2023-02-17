@@ -54,7 +54,7 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
         await setNftDetails(contract);
     }
     const updateRemainingTime = () => {
-        const remainingTimeInMilliseconds = new Date(expirationDate * 1000).getTime() - new Date().getTime();
+        const remainingTimeInMilliseconds = new Date(expirationDate).getTime() - new Date().getTime();
         setRemainingTime(remainingTimeInMilliseconds);
     }
 
