@@ -1,4 +1,29 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/auction-front/node_modules
+/auction-front/.pnp
+/auction-front/.pnp.js
+
+# testing
+/auction-front/coverage
+
+# production
+/auction-front/build
+
+# misc
+/auction-front/.DS_Store
+/auction-front/.env.local
+/auction-front/.env.development.local
+/auction-front/.env.test.local
+/auction-front/.env.production.local
+
+/auction-front/npm-debug.log*
+/auction-front/yarn-debug.log*
+/auction-front/yarn-error.log*
+
 .idea
 node_modules
 auction-truffle/node_modules
 auction-truffle/build
+
