@@ -28,7 +28,7 @@ contract Auction is Ownable{
         tokenId = _tokenId;
         currentBidder = address(0);
         currentBidValue = 0;
-        endTime = block.timestamp + 72 hours;
+        endTime = block.timestamp + 20 minutes;
         currentState = State.OPEN;
     }
 

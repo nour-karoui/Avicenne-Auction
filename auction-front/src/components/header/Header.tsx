@@ -1,13 +1,43 @@
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import {Button, Grid, IconButton, Typography} from "@mui/material";
 import PersonIcon from '@mui/icons-material/Person';
-import {useState} from "react";
+import {useEffect, useState} from "react";
+import {getWalletAddress, getWalletBalance} from "../../services/initWeb3";
+import {ethers} from "ethers";
 
 function Header() {
 
-    const [walletAddress, setWalletAddress] = useState<string>('0x56789854567898765678909876');
-    const [walletBalance, setWalletBalance] = useState<string>('0.123444');
+    const [walletAddress, setWalletAddress] = useState<string>('0x00');
+    const [walletBalance, setWalletBalance] = useState<number>(0);
     const [walletConnected, setWalletConnected] = useState(false);
+
+    useEffect(() => {
+        initWalletAddress();
+        initWalletBalance();
+    });
+
+    const initWalletAddress = async () => {
+        const address = await getWalletAddress();
+        if (address) {
+            setWalletAddress(address);
+            setWalletConnected(true);
+        } else {
+            // setOpen(true);
+        }
+    };
+
+    const initWalletBalance = async () => {
+        const balance = await getWalletBalance();
+        if (balance) {
+            setWalletBalance(Math.round(parseFloat(balance) * 10000) / 10000);
+        }
+    };
+
+    const connectWallet = async () => {
+        console.log('connectWithMetamask');
+        await initWalletAddress();
+        await initWalletBalance();
+    }
 
     const copyAddress = async () => {
         await navigator.clipboard.writeText(walletAddress);
@@ -44,7 +74,7 @@ function Header() {
                             </Grid>
                         </Grid>
                         :
-                        <Button variant="outlined">
+                        <Button variant="outlined" onClick={connectWallet}>
                             Connect to wallet
                         </Button>
                 }

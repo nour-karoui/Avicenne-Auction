@@ -6,10 +6,6 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import './Auction.sol';
 
 contract AuctionsFactory {
-    struct AuctionToken {
-        address nftAddress;
-        uint256 tokenId;
-    }
     mapping(string => bool) public openAuctions;
     mapping(uint256 => address) public totalAuctions;
     uint256 public totalAuctionsCount;
@@ -38,7 +34,7 @@ contract AuctionsFactory {
         return string.concat(Strings.toHexString(uint160(_nftAddress), 20), Strings.toString(_tokenId));
     }
 
-    function getAuctionByIndex(uint256 index) view public returns (address) {
+    function getAuctionAddressByIndex(uint256 index) view public returns (address) {
         require(totalAuctions[index] != address(0), 'This Auction Does Not Exist');
         return totalAuctions[index];
     }

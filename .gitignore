@@ -26,4 +26,5 @@
 node_modules
 auction-truffle/node_modules
 auction-truffle/build
+auction-truffle/.env
 

@@ -3,27 +3,58 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import {Fragment, useEffect, useState} from "react";
 import {LoadingButton} from "@mui/lab";
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
+import {getAuction} from "../../services/initWeb3";
 
 
 const isLeadBidder = true;
 
-function GalleryItemCard() {
+interface GalleryItemCardProps {
+    address: string;
+}
+
+function GalleryItemCard({address}: GalleryItemCardProps) {
 
     const [placeBidLoading, setPlaceBidLoading] = useState(false);
-
+    const [auction, setAuction] = useState<any>(null);
     // a number corresponding to the timestamp of the expiration of the auction
-    const [expirationDate, setExpirationDate] = useState<number>((new Date()).getTime() + 7200000 * 30);
-
-    const [remainingTime, setRemainingTime] = useState<Date | undefined>(new Date());
+    const [expirationDate, setExpirationDate] = useState<number>(0);
+    const [owner, setOwner] = useState('');
+    const [currentBidder, setCurrentBidder] = useState<string>('');
+    const [currentBidValue, setCurrentBidValue] = useState(0);
+    const [tokenUri, setTokenUri] = useState('');
+    const [remainingTime, setRemainingTime] = useState<number>();
 
     useEffect(() => {
         const intervalRef = setInterval(updateRemainingTime, 1000);
+        initAuctionDetails();
         return () => clearInterval(intervalRef);
-    }, [])
+    }, [address]);
 
+    const initAuctionDetails = async () => {
+        const contract = await getAuction(address);
+        setAuction(contract);
+        await setNftDetails(contract);
+    }
     const updateRemainingTime = () => {
-        const remainingTimeInMilliseconds = expirationDate - new Date().getTime();
-        setRemainingTime(new Date(remainingTimeInMilliseconds));
+        const d = new Date(0); // The 0 there is the key, which sets the date to the epoch
+        d.setUTCSeconds(expirationDate);
+        const remainingTimeInMilliseconds =  d.getMilliseconds() - new Date().getTime();
+        setRemainingTime(remainingTimeInMilliseconds);
+    }
+
+    const setNftDetails = async (contract: any) => {
+        const endTime = await contract.getEndTime();
+        console.log('this is endtime')
+        console.log(endTime.toNumber())
+        setExpirationDate(endTime.toNumber());
+        const currentBidder = await contract.getCurrentBidder();
+        setCurrentBidder(currentBidder);
+        const currentBidValue = await contract.getCurrentBidValue();
+        setCurrentBidValue(currentBidValue.toNumber());
+        const nftOwner = await contract.getNFTOwner();
+        setOwner(nftOwner);
+        const tokenUri = await contract.getTokenUri();
+        setTokenUri(tokenUri);
     }
 
     const placeBid = () => {
@@ -50,7 +81,7 @@ function GalleryItemCard() {
                                     Current Bid
                                 </Typography>
                                 <Typography variant="h6" component="div">
-                                    0.123 ETH
+                                    {currentBidValue} ETH
                                 </Typography>
                             </Grid>
                         </Grid>
@@ -60,7 +91,7 @@ function GalleryItemCard() {
                                     Lead Bidder
                                 </Typography>
                                 { isLeadBidder
-                                    ? <Chip label="Mister bidder" variant="outlined"/>
+                                    ? <Chip label={currentBidder.slice(0,5) + "..."} variant="outlined"/>
                                     : <Chip label="Me"
                                             icon={<FiberManualRecordIcon style={{transform: 'scale(0.5)'}} />}
                                             variant="outlined" color="success"/>}
@@ -74,8 +105,8 @@ function GalleryItemCard() {
                                 Remaining Time
                             </Typography>
                             <Typography variant="h6" component="div">
-                                {remainingTime.getHours()}h :{remainingTime.getMinutes()}m
-                                : {remainingTime.getSeconds()}s
+                                {Math.floor(remainingTime / (1000 * 60 * 60)) }h :{Math.floor((remainingTime / (1000 * 60)) % 60)}m
+                                : {Math.floor((remainingTime / 1000) % 60)}s
                             </Typography>
                         </Fragment>
                     }

@@ -1,6 +1,7 @@
 import {Grid, InputAdornment, TextField} from "@mui/material";
 import {LoadingButton} from "@mui/lab";
 import {useState} from "react";
+import {auctionsFactory} from "../../services/initWeb3";
 
 function NewAuctionForm() {
 
@@ -21,6 +22,10 @@ function NewAuctionForm() {
     const onStartingPriceChange = (value: string) => {
         const floatValue = parseFloat(value);
         setStartingPrice(startingPrice.onChange(floatValue));
+    }
+
+    const onSubmit = async () => {
+        await auctionsFactory.createNewAuction(tokenAddress.value, tokenId.value);
     }
 
     return (
@@ -57,6 +62,7 @@ function NewAuctionForm() {
                                    disabled={!(tokenAddress.isValid && tokenId.isValid && startingPrice.isValid)
                                        || tokenAddress.isPristine || tokenId.isPristine || startingPrice.isPristine}
                                    loading={addAuctionLoading}
+                                   onClick={onSubmit}
                     >
                         Add Auction
                     </LoadingButton>
