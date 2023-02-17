@@ -15,9 +15,9 @@ contract AuctionsFactory {
     }
 
     function createNewAuction(address _nftAddress, uint256 _tokenId) payable public {
-        require(openAuctions[concatTokenProperties(_nftAddress, _tokenId)] == false, 'This NFT is in an open Auction');
+        // require(openAuctions[concatTokenProperties(_nftAddress, _tokenId)] == false, 'This NFT is in an open Auction');
         Auction auction = new Auction(_nftAddress, _tokenId, msg.sender, address(this));
-        setAuctionState(_nftAddress, _tokenId, true);
+        // setAuctionState(_nftAddress, _tokenId, true);
         appendAuction(address(auction));
     }
 

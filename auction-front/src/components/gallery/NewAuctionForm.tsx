@@ -25,7 +25,8 @@ function NewAuctionForm() {
     }
 
     const onSubmit = async () => {
-        await auctionsFactory.createNewAuction(tokenAddress.value, tokenId.value);
+        const tx = await auctionsFactory.createNewAuction(tokenAddress.value, tokenId.value, {gasLimit: 5000000});
+        await tx.wait();
     }
 
     return (

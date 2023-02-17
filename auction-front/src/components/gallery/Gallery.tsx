@@ -17,13 +17,14 @@ function Gallery() {
             addressesList.push(address);
         }
         setAuctionsAddresses(addressesList);
+        console.log(addressesList);
     }
     return (
         <Grid container spacing={20} justifyContent="space-evenly">
             {
-                [1].map((address) =>
+                auctionsAddresses.map((address) =>
                     <Grid item key={address}>
-                        <GalleryItemCard address={"1"}/>
+                        <GalleryItemCard address={address}/>
                     </Grid>
                 )
             }

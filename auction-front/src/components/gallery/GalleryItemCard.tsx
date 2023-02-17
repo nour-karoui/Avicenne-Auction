@@ -39,7 +39,7 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
     const [bidAmount, setBidAmount] = useState(0);
 
     useEffect(() => {
-        setBidAmount(currentBidValue + 0.1);
+        setBidAmount(parseFloat(currentBidValue) + 0.1);
     }, [currentBidValue]);
 
     useEffect(() => {
