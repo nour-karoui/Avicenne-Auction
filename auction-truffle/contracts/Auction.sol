@@ -27,7 +27,7 @@ contract Auction is Ownable{
         _;
     }
 
-    constructor(address _nftAddress, uint256 _tokenId, uint256 startingPrice, address _nftOwner, address auctionFactory) nftOwner(_nftAddress, _tokenId, _nftOwner) {
+    constructor(address _nftAddress, uint256 _tokenId, uint256 startingPrice, address _nftOwner, address auctionFactory) {
         numberOfBidders = 0;
         nft = ERC1155(_nftAddress);
         setAuctionProperties(_nftAddress, _tokenId, startingPrice, _nftOwner);
