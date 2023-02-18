@@ -7,7 +7,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./AuctionFactory.sol";
 
 contract Auction is Ownable{
+
     enum State { OPEN, CLAIMED }
+
     State public currentState;
     uint256 private numberOfBidders;
     address private nftAddress;
