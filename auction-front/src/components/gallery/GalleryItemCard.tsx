@@ -89,7 +89,13 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
             axios.get(tokenUri.replace('0x{id}', tokenId)).then((res: AxiosResponse) => {
                 setImageUrl(res.data.image);
                 setImageFetchingError(undefined);
-            }).catch((e) => setImageFetchingError(e));
+            }).catch((e) => {
+                if (imageUrl === defaultImageURL) {
+                    setImageFetchingError(e);
+                } else {
+                    setImageFetchingError(undefined);
+                }
+            });
         }
     }, [imageFetchingError]);
 
@@ -112,7 +118,7 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
             setClosed(true);
         } else {
             setRemainingTime(remainingTimeInMilliseconds);
-            setClosed(false);
+            // setClosed(false);
         }
     }
 
@@ -121,6 +127,13 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
         setExpirationDate(endTime.toNumber() * 1000);
         const currentBidder = await contract.getCurrentBidder();
         setCurrentBidder(currentBidder);
+
+        const nbBidders = await contract.getNumberOfBidders();
+        const lastBidderDate = await contract.getLastBidDate() * 1000;
+        let maxHours = nbBidders > 1 ? 6 : 12;
+        if ((nbBidders > 0) && (diffHours(new Date(lastBidderDate), new Date()) > maxHours)) {
+            setClosed(true);
+        }
         const currentBidValue = await contract.getCurrentBidValue();
         setCurrentBidValue(ethers.utils.formatEther(currentBidValue));
         const nftOwner = await contract.getNFTOwner();
@@ -195,7 +208,7 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
             <CardMedia
                 sx={{height: 300}}
                 image={imageUrl}
-                title={"name"}
+                title={tokenUri}
             />
             <CardContent>
                 <Grid container justifyContent="space-between" alignItems="center">
@@ -360,6 +373,14 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
             </CardActions>
         </Card>
     )
+}
+
+const diffHours = (dt2: Date, dt1: Date) => {
+
+    let diff = (dt2.getTime() - dt1.getTime()) / 1000;
+    diff /= (60 * 60);
+    return Math.abs(Math.round(diff));
+
 }
 
 export default GalleryItemCard;
