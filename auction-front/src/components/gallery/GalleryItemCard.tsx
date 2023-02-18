@@ -65,6 +65,8 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
 
     const [walletAddress, setWalletAddress] = useState<string>('0x00');
 
+    const [imageFetchingError, setImageFetchingError] = useState<any>(undefined);
+
     useEffect(() => {
         initWalletAddress().then();
     }, []);
@@ -81,6 +83,15 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
         initAuctionDetails();
         return () => intervalRef && clearInterval(intervalRef);
     }, [address, closed, expirationDate]);
+
+    useEffect(() => {
+        if (imageFetchingError !== undefined) {
+            axios.get(tokenUri.replace('0x{id}', tokenId)).then((res: AxiosResponse) => {
+                setImageUrl(res.data.image);
+                setImageFetchingError(undefined);
+            }).catch((e) => setImageFetchingError(e));
+        }
+    }, [imageFetchingError]);
 
     const initAuctionDetails = async () => {
         const contract = await getAuction(address);
@@ -122,9 +133,12 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
         setClaimed(state === State.CLAIMED);
         const nftTokenUri = await contract.getTokenUri();
         setTokenUri(nftTokenUri.replace('0x{id}', tokenId));
-        if (imageUrl === defaultImageURL) {
+        try {
             const res: AxiosResponse = await axios.get(nftTokenUri.replace('0x{id}', tokenId));
             setImageUrl(res.data.image);
+            setImageFetchingError(undefined);
+        } catch (e) {
+            setImageFetchingError(e);
         }
     }
 
@@ -200,7 +214,7 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
                                 <Typography variant="subtitle2">
                                     Lead Bidder
                                 </Typography>
-                                {currentBidder == walletAddress
+                                {currentBidder !== walletAddress
                                     ? <Chip label={currentBidder.slice(0, 5) + "..."} variant="outlined"/>
                                     : <Chip label="Me"
                                             icon={<FiberManualRecordIcon style={{transform: 'scale(0.5)'}}/>}
@@ -208,27 +222,45 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
                             </Grid>
                         </Grid>
                     </Grid>
-                    <Grid item>{
-                        (remainingTime && !closed) &&
-                        <Fragment>
-                            <Typography variant="subtitle2">
-                                Remaining Time
-                            </Typography>
-                            <Typography variant="h6" component="div">
-                                {Math.floor(remainingTime / (1000 * 60 * 60))}h
-                                :{Math.floor((remainingTime / (1000 * 60)) % 60)}m
-                                : {Math.floor((remainingTime / 1000) % 60)}s
-                            </Typography>
-                        </Fragment>
-                    }
-                        {
-                            closed &&
-                            <Box width="100px" justifyContent="center" justifyItems="center">
-                                <Alert severity="error" variant="filled" icon={false} sx={{justifyContent: 'center'}}>
-                                    CLOSED
-                                </Alert>
-                            </Box>
-                        }
+                    <Grid item>
+                        <Grid container>
+                            <Grid item xs>
+                                {
+                                    (remainingTime && !closed) &&
+                                    <Fragment>
+                                        <Typography variant="subtitle2">
+                                            Remaining Time
+                                        </Typography>
+                                        <Typography variant="h6" component="div">
+                                            {Math.floor(remainingTime / (1000 * 60 * 60))}h
+                                            :{Math.floor((remainingTime / (1000 * 60)) % 60)}m
+                                            : {Math.floor((remainingTime / 1000) % 60)}s
+                                        </Typography>
+                                    </Fragment>
+                                }
+                                {
+                                    closed &&
+                                    <Box width="100px" justifyContent="center" justifyItems="center">
+                                        <Alert severity="error" variant="filled" icon={false}
+                                               sx={{justifyContent: 'center'}}>
+                                            CLOSED
+                                        </Alert>
+                                    </Box>
+                                }
+                            </Grid>
+                        </Grid>
+                        <Grid container>
+                            <Grid item>
+                                <Typography variant="subtitle2">
+                                    Owner
+                                </Typography>
+                                {owner !== walletAddress
+                                    ? <Chip label={owner.slice(0, 5) + "..."} variant="outlined"/>
+                                    : <Chip label="Me"
+                                            icon={<FiberManualRecordIcon style={{transform: 'scale(0.5)'}}/>}
+                                            variant="outlined" color="success"/>}
+                            </Grid>
+                        </Grid>
                     </Grid>
                 </Grid>
             </CardContent>
