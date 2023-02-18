@@ -4,7 +4,7 @@ HELLO <img src="https://raw.githubusercontent.com/MartinHeinz/MartinHeinz/master
 ## ✂️ How is this project divided?
 The project is divided into 2 main sections:
 1. ***Auction-truffle:*** The truffle project, containing all the smart contracts used for this project and their deployments configurations.
-2. ***Auction's platform:*** The Dapp that allows users to auction with their NFT and participate in open auctions. [*Visit Auction-cienne*](https://nour-karoui.github.io/molecule-research-nfts/)
+2. ***Auction's platform:*** The Dapp that allows users to auction with their NFT and participate in open auctions. [*Visit Auction-cienne*](http://auction-cienne.s3-website.eu-central-1.amazonaws.com/)
 
 ## 🙌 What is Auction-cienne?
 It is a **decentralized app for NFT auction** hosted on **Goerli Testnet** built with ***Truffle Framework***, ***ReactJs*** and ***ethers.js*** library.

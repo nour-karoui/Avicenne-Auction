@@ -201,10 +201,11 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
                                     Lead Bidder
                                 </Typography>
                                 {currentBidder == walletAddress
-                                    ? <Chip label={currentBidder.slice(0, 5) + "..."} variant="outlined"/>
-                                    : <Chip label="Me"
+                                    ? <Chip label="Me"
                                             icon={<FiberManualRecordIcon style={{transform: 'scale(0.5)'}}/>}
-                                            variant="outlined" color="success"/>}
+                                            variant="outlined" color="success"/>
+                                    : <Chip label={currentBidder.slice(0, 5) + "..."} variant="outlined"/>
+                                }
                             </Grid>
                         </Grid>
                     </Grid>
