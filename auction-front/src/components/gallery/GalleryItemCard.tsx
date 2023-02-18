@@ -214,11 +214,18 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
                                 <Typography variant="subtitle2">
                                     Lead Bidder
                                 </Typography>
+<<<<<<< HEAD
                                 {currentBidder !== walletAddress
                                     ? <Chip label={currentBidder.slice(0, 5) + "..."} variant="outlined"/>
                                     : <Chip label="Me"
+=======
+                                {currentBidder == walletAddress
+                                    ? <Chip label="Me"
+>>>>>>> ac9430e057d3ee2a36e5b30443adc876dd9935dd
                                             icon={<FiberManualRecordIcon style={{transform: 'scale(0.5)'}}/>}
-                                            variant="outlined" color="success"/>}
+                                            variant="outlined" color="success"/>
+                                    : <Chip label={currentBidder.slice(0, 5) + "..."} variant="outlined"/>
+                                }
                             </Grid>
                         </Grid>
                     </Grid>
