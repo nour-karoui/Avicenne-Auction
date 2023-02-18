@@ -143,6 +143,8 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
     }
 
     const placeBid = async () => {
+        console.log('here is auction address');
+        console.log(auction.address);
         setLoading(BID_AUCTION);
         try {
             const tx = await auction.bid({value: ethers.utils.parseEther(bidAmount.toString())});
@@ -179,7 +181,6 @@ function GalleryItemCard({address}: GalleryItemCardProps) {
             const tx = await auction.endAuction({gasLimit: 5000000});
             await tx.wait();
         } catch (e: any) {
-            console.log(e);
             setErrorMessage(e.reason);
             setErrorOpen(true);
         } finally {

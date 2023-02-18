@@ -43,6 +43,7 @@ function NewAuctionForm({addAuctionCallback}: NewAuctionFormProps) {
             const result = await tx.wait();
             const auctionAddress = result.events[0].address;
             const tokenContract = await getERC721Contract(tokenAddress.value.toString());
+            console.log('here is auction address: ' + auctionAddress);
             const nftTx = await tokenContract.setApprovalForAll(auctionAddress, true, {gasLimit: 5000000});
             await nftTx.wait();
             addAuctionCallback();

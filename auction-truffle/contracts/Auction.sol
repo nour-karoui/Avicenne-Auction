@@ -21,12 +21,6 @@ contract Auction is Ownable{
     ERC1155 private nft;
     AuctionsFactory private factory;
 
-    modifier nftOwner(address _nftAddress, uint256 _tokenId, address _nftOwner) {
-        uint256 amount = nft.balanceOf(_nftOwner, _tokenId);
-        require(amount > 0, "you are not the owner of the NFT");
-        _;
-    }
-
     constructor(address _nftAddress, uint256 _tokenId, uint256 startingPrice, address _nftOwner, address auctionFactory) {
         numberOfBidders = 0;
         nft = ERC1155(_nftAddress);
@@ -45,7 +39,7 @@ contract Auction is Ownable{
     }
 
     function bid() public payable {
-        require((numberOfBidders == 1 && block.timestamp > 12 hours + lastBidDate) || (numberOfBidders > 1 && block.timestamp > 6 hours + lastBidDate) ,"The auction is closed");
+        require(numberOfBidders == 0 || (numberOfBidders == 1 && block.timestamp < 12 hours + lastBidDate) || (numberOfBidders > 1 && block.timestamp < 6 hours + lastBidDate) ,"The auction is closed");
         require(block.timestamp < endTime, "The auction is closed");
         require(msg.sender != currentBidder, "You cannot overbid yourself");
         require(msg.sender != owner(), "You are the owner of the Auction, you cannot bid");
@@ -105,5 +99,11 @@ contract Auction is Ownable{
 
     function getTokenUri() public view returns(string memory) {
         return nft.uri(tokenId);
+    }
+
+    modifier nftOwner(address _nftAddress, uint256 _tokenId, address _nftOwner) {
+        uint256 amount = nft.balanceOf(_nftOwner, _tokenId);
+        require(amount > 0, "you are not the owner of the NFT");
+        _;
     }
 }
