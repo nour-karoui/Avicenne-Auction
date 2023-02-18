@@ -9,15 +9,24 @@ import "./AuctionFactory.sol";
 contract Auction is Ownable{
     enum State { OPEN, CLAIMED }
     State public currentState;
+    uint256 private numberOfBidders;
     address private nftAddress;
     uint256 private tokenId;
     address private currentBidder;
     uint256 private currentBidValue;
     uint256 private endTime;
+    uint256 private lastBidDate;
     ERC1155 private nft;
     AuctionsFactory private factory;
 
-    constructor(address _nftAddress, uint256 _tokenId, uint256 startingPrice, address _nftOwner, address auctionFactory) {
+    modifier nftOwner(address _nftAddress, uint256 _tokenId, address _nftOwner) {
+        uint256 amount = nft.balanceOf(_nftOwner, _tokenId);
+        require(amount > 0, "you are not the owner of the NFT");
+        _;
+    }
+
+    constructor(address _nftAddress, uint256 _tokenId, uint256 startingPrice, address _nftOwner, address auctionFactory) nftOwner(_nftAddress, _tokenId, _nftOwner) {
+        numberOfBidders = 0;
         nft = ERC1155(_nftAddress);
         setAuctionProperties(_nftAddress, _tokenId, startingPrice, _nftOwner);
         factory = AuctionsFactory(auctionFactory);
@@ -34,6 +43,7 @@ contract Auction is Ownable{
     }
 
     function bid() public payable {
+        require((numberOfBidders == 1 && block.timestamp > 12 hours + lastBidDate) || (numberOfBidders > 1 && block.timestamp > 6 hours + lastBidDate) ,"The auction is closed");
         require(block.timestamp < endTime, "The auction is closed");
         require(msg.sender != currentBidder, "You cannot overbid yourself");
         require(msg.sender != owner(), "You are the owner of the Auction, you cannot bid");
@@ -44,16 +54,27 @@ contract Auction is Ownable{
         payable(currentBidder).transfer(currentBidValue);
         currentBidValue = msg.value;
         currentBidder = msg.sender;
+        lastBidDate = block.timestamp;
+        numberOfBidders += 1;
     }
 
     function endAuction() public payable {
         require(block.timestamp > endTime, "The auction is not over yet");
         require(currentState == State.OPEN, "The prize is already claimed");
         require(msg.sender == owner() || msg.sender == currentBidder, 'You are not allowed to end this auction');
-        nft.safeTransferFrom(owner(), currentBidder, tokenId, 1, bytes32(0));
+        bytes memory emptyData = new bytes(0);
+        nft.safeTransferFrom(owner(), currentBidder, tokenId, 1, emptyData);
         payable(owner()).transfer(currentBidValue);
         currentState = State.CLAIMED;
         factory.setAuctionState(nftAddress, tokenId, false);
+    }
+
+    function getNumberOfBidders() public view returns(uint256) {
+        return numberOfBidders;
+    }
+
+    function getLastBidDate() public view returns(uint256) {
+        return lastBidDate;
     }
 
     function getNFTOwner() public view returns(address){
@@ -82,11 +103,5 @@ contract Auction is Ownable{
 
     function getTokenUri() public view returns(string memory) {
         return nft.uri(tokenId);
-    }
-
-    modifier nftOwner(address _nftAddress, uint256 _tokenId, address _nftOwner) {
-        uint256 amount = nft.balanceOf(_nftOwner, _tokenId);
-        require(amount > 0, "you are not the owner of the NFT");
-        _;
     }
 }
