@@ -134,4 +134,5 @@ export const AuctionsFactoryABI = [
     }
 ];
 
-export const AuctionsFactoryAddress = '0xAdF35751d3970FA64351c861b9791fD554DBD5a5';
+export const AuctionsFactoryAddress = '0x756765E1bDaD8Ba232222867B2cE082a0a9450b4';
+// export const AuctionsFactoryAddress = '0xAdF35751d3970FA64351c861b9791fD554DBD5a5';
