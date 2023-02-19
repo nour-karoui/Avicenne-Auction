@@ -1,6 +1,18 @@
 HELLO <img src="https://raw.githubusercontent.com/MartinHeinz/MartinHeinz/master/wave.gif" width="30px"> This is Auction-cienne
 ---
 
+<p>
+  <a href="https://github.com/nour-karoui/NFT-auction#readme" target="_blank">
+    <img alt="Documentation" src="https://img.shields.io/badge/documentation-yes-brightgreen.svg" />
+  </a>
+  <a href="https://github.com/nour-karoui/NFT-Auction/graphs/commit-activity" target="_blank">
+    <img alt="Maintenance" src="https://img.shields.io/badge/Maintained%3F-yes-green.svg" />
+  </a>
+  <a href="https://github.com/nour-karoui/NFT-Auction/blob/main/LICENSE" target="_blank">
+    <img alt="License: MIT" src="https://img.shields.io/github/license/bishkou/password-pwnd" />
+  </a>
+</p>
+
 ## ✂️ How is this project divided?
 The project is divided into 2 main sections:
 1. ***Auction-truffle:*** The truffle project, containing all the smart contracts used for this project and their deployments configurations.
