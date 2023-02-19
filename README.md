@@ -8,7 +8,7 @@ HELLO <img src="https://raw.githubusercontent.com/MartinHeinz/MartinHeinz/master
   <a href="https://github.com/nour-karoui/NFT-Auction/graphs/commit-activity" target="_blank">
     <img alt="Maintenance" src="https://img.shields.io/badge/Maintained%3F-yes-green.svg" />
   </a>
-  <a href="https://github.com/nour-karoui/NFT-Auction/blob/main/LICENSE" target="_blank">
+  <a href="https://github.com/nour-karoui/NFT-Auction/blob/main/license" target="_blank">
     <img alt="License: MIT" src="https://img.shields.io/github/license/bishkou/password-pwnd" />
   </a>
 </p>
