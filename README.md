@@ -50,7 +50,7 @@ Run this command to install dependencies:
 
 ---
 
-> **The run the DApp you need both a Metamask wallet attached to your Browser, and owned NFTs on Opensea, also you need some Goerli Ether**
+> **To run the DApp you need both a Metamask wallet attached to your Browser, and owned NFTs on Opensea, also you need some Goerli Ether**
 
 > You can get some Goerli ETH on [This Faucet](https://goerlifaucet.com/).
 
@@ -64,6 +64,7 @@ To interact with the auction-cienne app
     npm start
 ```
 ## 🔨 Areas of Improvements
-1. Solidity events emitting, web3 client should be subscribed to the events emitted from the smart contracts.
-2. Make end Auction scheduled, as soon as the time is over the scheduler should trigger the end Auction function and transfer the nft to the new owner.
-3. Implement unit testing for the smart contracts.
+1. Automating the contract deployment and integration with frontend (updating ABI and address).
+2. Add unit tests to both smart contract and frontend.
+3. Add events to smart contract and event listening to frontend.
+4. Automate the process of transferring NFT at the end of the auction, (with chainlink client for eg).
